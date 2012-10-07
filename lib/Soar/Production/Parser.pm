@@ -192,7 +192,21 @@ Soar::Production::Parser - Perl extension for parsing angst grammar files
   use Data::Dumper;
   my $parser = Soar::Production::Parser->new;
   my @trees=$parser->parse_file("foo.soar");
-  print Dumper(\@tree);
+  print Dumper(\@trees);
+
+=head1 DESCRIPTION
+
+Soar is a cognitive modeling architecture for programming and experimenting with intelligent agents. Soar is programmed using productions that look like this:
+
+	sp{name
+		(state <s>)
+		-->
+		(<s> ^foo bar)
+	}
+
+The preceding production matches any state and adds an element named "foo" with the value "bar" to it. Productions can get much more complicated than that.
+This module can be used to parse these productions. Underlyingly, a Parse::RecDescent grammar is used to convert a production into a parse tree. 
+There are also methods for extracting all of the productions from a file string, and to remove comments (not that I think you'll ever want to do that!). 
   
 =head1 METHODS
 
@@ -211,6 +225,7 @@ Argument: Reference to array containing text for individual productions.
 Return: Reference to an array containing parse trees for each of the productions in the input array reference.
 
 =head2 C<no_comment>
+
 Argument: Text which contains Soar productions or commands
 Return: Same text, but with all comments removed. Comments are indicated with a # (pound), optionally preceded by a ; (semicolon) and whitespace.
 
@@ -235,3 +250,8 @@ For example, if you would like to extract all of the productions from a file and
 	for my $prod(@$productions){
 		print Dumper($prod);
 	}
+
+=head1 SEE ALSO
+
+The documentation for Soar is located at L<https://code.google.com/p/soar/>.
+You may also be interested in what a production system is, since this module parses Soar productions: L<http://en.wikipedia.org/wiki/Production_system>.

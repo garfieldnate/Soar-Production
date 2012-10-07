@@ -293,6 +293,7 @@ Soar::Production::Parser::PRDGrammar - C<Parse::RecDescent> grammar for parsing 
 This module holds one string: a C<Parse::RecDescent> grammar for parsing Soar productions.
 
 =head1 SYNOPSIS
+
   use Soar::Production::Parser::PRDGrammar;
   use Parse::RecDescent;
   
@@ -302,11 +303,13 @@ This module holds one string: a C<Parse::RecDescent> grammar for parsing Soar pr
 =head1 BNF Grammar from the Soar Manual
 
 The following is a description of a grammar describing Soar productions, from the Soar manual.
-Note also that a '#' (pound sign) indicates an end-of-line comment.
+Note also that a /(;\s*)?\#/ (pound sign optionally preceded by semi-colon and white space) indicates an end-of-line comment.
+Soar does not have multi-line comments.
 
 =head2 Grammar of Soar productions
 
 A grammar for Soar productions is:
+
 	<soar-production> ::= sp "{" <production-name> [<documentation>] [<flags>]
 	<condition-side> --> <action-side> "}"
 	<documentation> ::= """ [<string>] """
@@ -317,7 +320,7 @@ A grammar for Soar productions is:
 I have modified the grammar below from the original to account for the fact that an instance of <state-imp-cond> is not required to start the LHS, and may actually occur anywhere inside of it. 
 
 	Below is a grammar for the condition sides of productions:
-	<condition-side> ::= <cond>*
+	<condition-side> ::= <cond>+
 	<cond> ::= <positive_cond> | "-" <positive_cond>
 	<positive_cond> ::= <state-imp-cond> | <conds_for_one_id> | "{" <cond>+ "}"
 	<state-imp-cond> ::= "(" (state | impasse) [<id_test>] <attr_value_tests>+ ")"
@@ -343,6 +346,7 @@ In an <id_test>, only a <variable> may be used in a <single_test>.
 =head3 Grammar for Action Side
 
 Below is a grammar for the action sides of productions:
+
 	<rhs> ::= <rhs_action>*
 	<rhs_action> ::= "(" <variable> <attr_value_make>+ ")" | <func_call>
 	<func_call> ::= "(" <func_name> <rhs_value>* ")"
@@ -358,6 +362,7 @@ Below is a grammar for the action sides of productions:
 	<unary-or-binary-pref> ::= ">" | "=" | "<" | "&"
 	
 =head1 CAVEATS
+
 This grammar does not check for the semantic correctness of a production. For example, the following parses just fine:
 
 	sp {foo
@@ -368,6 +373,7 @@ This grammar does not check for the semantic correctness of a production. For ex
 Whereas the real Soar parser gives us an error, saying that <lt>s<gt> is not connected to the LHS in any way.
 
 =head1 BUGS
+
 This may belong in the realm of semantic verification, but for now it is considered a known bug. In Soar, numbers cannot be used to name a working memory element unless they are quoted. This is not yet implemented in this grammar, and thus the following is accepted, even though Soar would reject it:
 
 	sp {bad-numbers
@@ -376,4 +382,5 @@ This may belong in the realm of semantic verification, but for now it is conside
 	}
 	
 =head1 SEE ALSO
+
 The documentation for Soar is located at L<https://code.google.com/p/soar/>
