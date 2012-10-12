@@ -52,7 +52,7 @@ sp {foo
 }
 --- expected_structure
 {
-	type 			=> 'state',
+	condType 			=> 'state',
 	idTest			=> undef,
 	attrValueTests 	=> [],
 }

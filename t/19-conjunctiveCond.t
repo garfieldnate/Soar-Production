@@ -17,7 +17,7 @@ run_is 'parse_success' => 'expected';
 for my $block ( blocks('parse_struct')){
 	# diag Dumper($block->parse_struct);
 	# print 'expecting: ' . Dumper($block->expected_structure);
-	cmp_deeply($block->expected_structure, $block->parse_struct, $block->name);
+	cmp_deeply($block->parse_struct, $block->expected_structure, $block->name);
 }
 
 __END__
@@ -87,7 +87,7 @@ sp {negative-nested
 
 === conjunctive structure
 just verify the presence of this long path
---- parse_struct dive=LHS,conditions,0,condition,conjunction,0,condition,idTest,test,simpleTest,variable
+--- parse_struct dive=LHS,conditions,0,condition,conjunction,0,condition,idTest,simpleTest,variable
 sp {positive
 	{
 		(<s> ^foo <bar>)
