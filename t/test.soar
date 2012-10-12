@@ -1,0 +1,9 @@
+sp {hello-world
+	"some documentation"
+	:i-support
+	:o-support
+   (state <s> ^type state)
+-->
+   (write |Hello World|)
+   (halt)
+}
