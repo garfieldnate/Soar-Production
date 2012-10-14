@@ -4,6 +4,6 @@ sp {hello-world
 	:o-support
    (state <s> ^type state)
 -->
-   (write |Hello World|)
-   (halt)
+   (write |Hello World| <b> hi)
+   (+ 3 4)
 }

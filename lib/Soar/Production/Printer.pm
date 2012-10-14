@@ -27,7 +27,7 @@ sub _run {
     my $trees   = $parser->productions(file => $file, parse => 1);
     croak "parse failure\n" if ( $#$trees == -1 );
 
-    print Dumper($trees);
+    # print Dumper($trees);
     print $printer->print_tree($$trees[0]);
 	return;
 }
@@ -141,6 +141,116 @@ sub _positive_condition {
 
 sub _RHS {
 	my $RHS = shift;
+	my $text = '';
+	for my $action (@$RHS){
+		$text .= _action($action);
+		$text .= "\n\t";
+	}
+	return $text;
+}
+
+sub _action {
+	my $action = shift;
+	if(exists $action->{funcCall}){
+		return _funcCall($action->{funcCall});
+	}
+	
+	my $text = '(';
+	#TODO: continue here
+	$text .= ')';
+	return $text;
+}
+
+#variable | constant | "(crlf)" | funcCall
+sub _rhsValue {
+	my $rhsValue = shift;
+	# print Dumper $rhsValue;
+	if(exists $rhsValue->{variable}){
+		return _variable($rhsValue->{variable});
+	}
+	if(exists $rhsValue->{constant}){
+		return _constant($rhsValue);
+	}
+	if(exists $rhsValue->{function}){
+		return _funcCall($rhsValue);
+	}
+	return $rhsValue;
+}
+
+#(write |Hello World| |hello again|)
+sub _funcCall {
+	my $funcCall = shift;
+	
+	my ($name, $args) = (_funcName($funcCall->{function}), $funcCall->{args});
+	print $name;
+	my $text = '(' . $name;
+	if($#$args != -1){
+		$text .= ' ';
+		$text .= _args($args);
+	}
+	return $text . ')';
+}
+
+# arithmetic operator (+ - * /) or a symConstant, being the name of some function
+sub _funcName {
+	my $funcName = shift;
+	
+	if(ref $funcName eq 'HASH'){
+		return _symConstant($funcName);
+	}
+	return $funcName;
+}
+
+#just an array of values of some kind
+sub _args {
+	my $args = shift;
+	my @rhsValues;
+	for my $value (@$args){
+		push @rhsValues, _rhsValue($value);
+	}
+	return join ' ', @rhsValues;
+}
+
+sub _variable {
+	my $variable = shift;
+	return '<' . $variable . '>'
+}
+
+sub _constant {
+	my $constant = shift;
+	# print '_const' . Dumper $constant;
+	my ($type, $value) = ($constant->{type}, $constant->{constant});
+	
+	return _symConstant($value) if($type eq 'sym');
+	return _float($value) if($type eq 'float');
+	return _int($value) if($type eq 'int');
+}
+
+sub _float {
+	my $float = shift;
+	return $float;
+}
+
+sub _int {
+	my $int = shift;
+	return $int;
+}
+
+#either string or quoted
+sub _symConstant {
+	my $symConstant = shift;
+	# print '_sym' . Dumper $symConstant;
+	my ($type, $value) = ($symConstant->{type}, $symConstant->{value});
+	return _string($value) if($type eq 'string');
+	return _quoted($value);
+}
+
+sub _string {
+	return shift;
+}
+
+sub _quoted {
+	return '|' . shift . '|';
 }
 
 1;
