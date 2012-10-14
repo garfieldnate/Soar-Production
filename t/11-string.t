@@ -2,6 +2,7 @@
 
 use t::TestSoarProdParser;
 # use t::TestSoarProdParser::Filter;
+use Test::More 0.88;
 use Test::Deep;
 use Data::Dumper;
 use Test::Warn;
@@ -29,14 +30,17 @@ run_is 'parse_success' => 'expected';
 
 for my $block ( blocks('parse_struct')){
 	# print Dumper($block->parse_struct);
-	cmp_deeply($block->expected_structure, subhashof($block->parse_struct), $block->name);
+	cmp_deeply($block->expected_structure, subhashof($block->parse_struct), $block->name)
+		or diag explain $block->parse_struct;
 }
 
 #check for correct warning and structure at the same time
 for my $block( blocks('check_error')){
 	my $structure;
 	warning_is {$structure = parse($block->check_error)} { carped => $block->carps }, $block->name . ' carps';
+	
 	cmp_deeply($block->expected_structure, Dive($structure,@dive), $block->name . ' structure')
+		or diag explain Dive($structure,@dive);
 }
 
 __END__

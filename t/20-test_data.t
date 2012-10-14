@@ -1,7 +1,7 @@
 #Test that the parser can parse a wide variety of productions
 use strict;
 use warnings;
-use Test::More;
+use Test::More 0.88;
 use t::TestSoarProdParser;
 # plan tests => 1*blocks;
 
@@ -18,7 +18,7 @@ my $fullPath = File::Spec->catfile($path, $file . '.soar');
 my $productions = $parser->productions(file => $fullPath, parse => 0);
 plan tests => 1 + @$productions;
 
-diag('Testing parser\'s ability to parse all productions in examples/big.soar');
+note('Testing parser\'s ability to parse all productions in examples/big.soar');
 is($#$productions,821,'Found 822 productions in examples/big.soar');
 
 for my $prod(@$productions){

@@ -3,6 +3,7 @@
 use t::TestSoarProdParser;
 use Test::Deep;
 use Data::Dumper;
+use Test::More 0.88;
 
 plan tests => 1*blocks;
 
@@ -17,6 +18,7 @@ run_is 'parse_success' => 'expected';
 for my $block ( blocks('parse_struct')){
 	# diag Dumper($block->parse_struct);
 	cmp_deeply($block->expected_structure, subhashof($block->parse_struct), $block->name)
+		or diag explain $block->parse_struct;
 }
 
 __END__

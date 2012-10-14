@@ -1,6 +1,7 @@
 ﻿#test correct production name checking
 use t::TestSoarProdParser;
 use Test::Deep;
+use Test::More 0.88;
 # use Data::Dumper;
 
 plan tests => 1*blocks;
@@ -16,6 +17,7 @@ run_is 'parse_success' => 'expected';
 for my $block ( blocks('parse_struct')){
 	# warn 'comparing ' . Dumper($block->parse_struct) . ' with ' . Dumper $block->expected_structure;
 	cmp_deeply($block->expected_structure, subhashof($block->parse_struct), $block->name)
+		or diag explain $block->parse_struct;
 }
 
 __END__
