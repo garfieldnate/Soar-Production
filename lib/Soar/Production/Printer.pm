@@ -108,11 +108,8 @@ sub _flags {
 
 sub _LHS {
 	my $LHS = shift;
-	my $text = '';
-	for my $cond (@{ $LHS->{conditions} }){
-		$text .= _condition($cond);
-	}
-	return $text;
+	return join "\n\t", 
+		map { _condition($_) } @{ $LHS->{conditions} };
 }
 
 sub _condition {
@@ -122,9 +119,7 @@ sub _condition {
 	$text .= '-'
 		if($condition->{negative} eq 'yes');
 		
-	$text .= '(';
 	$text .= _positive_condition( $condition->{condition} );
-	$text .= ')';
 	
 	return $text;
 }
@@ -135,8 +130,145 @@ sub _positive_condition {
 	
 	return _conjunction( $condition->{conjunction} )
 		if($condition->{conjunction});
-	return '';#TODO: continue from here
+		
+	return _condsForOneId($condition);
+}
+
+sub _condsForOneId {
+	my $condsForOneId = shift;
+	my $text = '(';
+	my ($type, $idTest, $attrValueTests) = 
+		(
+			$condsForOneId->{condType}, 
+			$condsForOneId->{idTest}, 
+			$condsForOneId->{attrValueTests}
+		);
+		
+	$text .= $type
+		if(defined $type);
 	
+	$text .= ' ' . _test($idTest)
+		if(defined $idTest);
+		
+	if($#$attrValueTests != -1){
+		$text .= ' ';
+		$text .= join ' ', map { _attrValueTests($_) } @$attrValueTests;
+	}
+	
+	$text .= ')';
+	return $text;
+}
+
+sub _test {
+	my $test = shift;
+	
+	if(exists $test->{conjunctiveTest}){
+		return _conjunctiveTest( 
+			$test->{conjunctiveTest} );
+	}
+	
+	return _simpleTest( $test->{simpleTest} );
+}
+
+sub _conjunctiveTest {
+	my $conjTest = shift;
+	my $text = '{';
+	$text .= join ' ',
+		map { _simpleTest($_) } @$conjTest;
+	$text .= '}';
+}
+
+sub _simpleTest {
+	my $test = shift;
+	return _disjunctionTest($test->{disjunctionTest})
+		if( exists $test->{disjunctionTest} );
+	return _relationalTest($test->{relationalTest} )
+		if( exists $test->{relationalTest} );
+	return _singleTest($test);
+}
+
+sub _disjunctionTest {
+	my $test = shift;
+	my $text = '<< ';
+	$text .= join ' ', map { _constant($_) } @$test;
+	$text .= ' >>';
+	return $text;
+}
+
+sub _relationalTest {
+	my $test = shift;
+	
+	my $text = _relation( $test->{relation} );
+	$text .= ' ';
+	$text .= _singleTest( $test->{test} );
+	
+	return $text;
+}
+
+sub _relation {
+	my $relation = shift;
+	return $relation;
+}
+
+sub _singleTest {
+	my $test = shift;
+	return _variable($test->{variable})
+		if( exists $test->{variable} );
+	return _constant($test);
+}
+
+sub _attrValueTests {
+	my $attrValuetests = shift;
+	print 'hello';
+	my ($negative, $attrs, $values) = 
+		(
+			$attrValuetests->{negative},
+			$attrValuetests->{attrs},
+			$attrValuetests->{values}
+		);
+	my $text = '';
+	$text .= '-'
+		if($negative eq 'yes');
+	$text .= _attTest($attrs);
+	
+	if($#$values != -1){
+		$text .= ' ';
+		$text .= map { _valueTest($_) } @$values;
+	}
+	return $text;
+}
+
+sub _attTest {
+	my $attTest = shift;
+	my $text = '^';
+	$text .= join '.', map { _test($_) } @$attTest;
+	print $text;
+	return $text;
+}
+
+sub _valueTest {
+	my $valueTest = shift;
+	my $text = '';
+	
+	if(exists $valueTest->{test}){
+		$text = _test( $valueTest->{test} );
+	}else{
+		#condsForOneId
+		$text = _condsForOneId($valueTest->{conds});
+	}
+	
+	$text .= '+'
+		if($valueTest->{'+'} eq 'yes');
+	
+	return $text
+}
+
+sub _conjunction {
+	my $conjunction = shift;
+	my $text = '{';
+	$text .= join "\n\t", map { _condition($_) } @$conjunction;
+	$text .= '}';
+	return $text;
 }
 
 sub _RHS {
@@ -156,15 +288,56 @@ sub _action {
 	}
 	
 	my $text = '(';
-	#TODO: continue here
+	$text .= _variable($action->{variable});
+	$text .= ' ';
+	$text .= join ' ',
+		map {_attrValueMake($_)} @{ $action->{attrValueMake} };
 	$text .= ')';
+	return $text;
+}
+
+sub _attrValueMake {
+	my $attrValueMake = shift;
+	my ($attr, $valueMake) = 
+		($attrValueMake->{attr}, $attrValueMake->{valueMake});
+	my $text = '';
+	if($#$attr != -1){
+		$text .= join '.', map {_attr($_)} @$attr;
+	}
+	
+	$text .= ' ';
+	$text .= join ' ', map{_valueMake($_)} @$valueMake;
+	
+	return $text;
+}
+
+sub _valueMake {
+	my $valueMake = shift;
+	my ($rhsValue, $preferences) = 
+		($valueMake->{rhsValue}, $valueMake->{preferences});
+	my $text = _rhsValue($rhsValue);
+	#there will always be at least one preference; '+' is default
+	$text .= ' ';
+	$text .= join ',', map { _preference($_) } @$preferences;
+	return $text;
+}
+
+sub _preference {
+	my $preference = shift;
+	my $text = $preference->{value};
+	if($preference->{type} eq 'binary'){
+		$text .= ' ' . _rhsValue( $preference->{compareTo} );
+	}
 	return $text;
 }
 
 #variable | constant | "(crlf)" | funcCall
 sub _rhsValue {
 	my $rhsValue = shift;
-	# print Dumper $rhsValue;
+	
+	return '(crlf)'
+		if($rhsValue eq '(crlf)');
+		
 	if(exists $rhsValue->{variable}){
 		return _variable($rhsValue->{variable});
 	}
@@ -181,12 +354,12 @@ sub _rhsValue {
 sub _funcCall {
 	my $funcCall = shift;
 	
-	my ($name, $args) = (_funcName($funcCall->{function}), $funcCall->{args});
-	print $name;
+	my ($name, $args) = 
+		(_funcName($funcCall->{function}), $funcCall->{args});
 	my $text = '(' . $name;
 	if($#$args != -1){
 		$text .= ' ';
-		$text .= _args($args);
+		$text .= join ' ', map {_rhsValue($_)} @$args;
 	}
 	return $text . ')';
 }
@@ -201,14 +374,11 @@ sub _funcName {
 	return $funcName;
 }
 
-#just an array of values of some kind
-sub _args {
-	my $args = shift;
-	my @rhsValues;
-	for my $value (@$args){
-		push @rhsValues, _rhsValue($value);
-	}
-	return join ' ', @rhsValues;
+sub _attr {
+	my $attr = shift;
+	return '^' . _variable($attr->{variable})
+		if(exists $attr->{variable});
+	return '^' . _symConstant($attr);
 }
 
 sub _variable {
@@ -218,12 +388,11 @@ sub _variable {
 
 sub _constant {
 	my $constant = shift;
-	# print '_const' . Dumper $constant;
 	my ($type, $value) = ($constant->{type}, $constant->{constant});
 	
 	return _symConstant($value) if($type eq 'sym');
-	return _float($value) if($type eq 'float');
 	return _int($value) if($type eq 'int');
+	return _float($value);#only other type is 'float'
 }
 
 sub _float {
@@ -239,7 +408,6 @@ sub _int {
 #either string or quoted
 sub _symConstant {
 	my $symConstant = shift;
-	# print '_sym' . Dumper $symConstant;
 	my ($type, $value) = ($symConstant->{type}, $symConstant->{value});
 	return _string($value) if($type eq 'string');
 	return _quoted($value);
