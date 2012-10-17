@@ -3,9 +3,7 @@
 use strict;
 use Test::More 0.88;
 plan tests => 1;
-my $package = 'Soar::Production::Printer;
 
-require $package;
-new_ok($package);
+use_ok('Soar::Production::Printer');
 
 __END__

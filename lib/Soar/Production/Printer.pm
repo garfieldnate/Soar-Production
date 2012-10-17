@@ -3,71 +3,38 @@ use warnings;
 
 # ABSTRACT: Print Soar productions
 package Soar::Production::Printer;
+
+use parent 'Exporter';
+our @EXPORT = qw(tree_to_text);
+
 use Soar::Production::Parser;
 use Data::Dumper;
 use Carp;
+# use Test::More tests => 1;
 
-our $VERSION = '.01';
+# VERSION
 
 #default behavior is to read the input Soar file and output another one; worthless except for testing
-__PACKAGE__->new->_run(@ARGV) unless caller;
+_run(shift) unless caller;
 
-sub new {
-  my ($class) = @_;
-  my $printer = bless {}, $class;
-  $printer->_init;
-  $printer;
-}
-
-#pass in an Soar grammar file name. Parse the file, then reconstruct it and print to STDOUT.
+#pass in a Soar grammar file name. Parse the file, then reconstruct it and print to STDOUT.
 sub _run {
-	my ($printer, $file) = @_;
+	my ($file) = @_;
 
     my $parser = Soar::Production::Parser->new();
     my $trees   = $parser->productions(file => $file, parse => 1);
     croak "parse failure\n" if ( $#$trees == -1 );
 
-    # print Dumper($trees);
-    print $printer->print_tree($$trees[0]);
+    my $text = tree_to_text($$trees[0]);
+	my $tree = $parser->parse_text($text)
+		or croak 'illegal production printed';
+		
+	print $text;
 	return;
 }
 
-sub _init {
-  my ($printer) = @_;
-  $printer->{output_fh} = \*STDOUT;
-	$printer->{input_fh} = \*STDIN;
-}
-
-sub output_fh {
-	my ( $printer, $fh ) = @_;
-	if ($fh) {
-		if(ref($fh) eq 'GLOB'){
-			$printer->{output_fh} = $fh;
-		}
-		else{
-			open my $fh2, '>', $fh or die "Couldn't open $fh";
-			$printer->{output_fh} = $fh2;
-		}
-	}
-	$printer->{output_fh};
-}
-
-sub input_fh {
-	my ( $printer, $fh ) = @_;
-	if ($fh) {
-		if(ref($fh) eq 'GLOB'){
-			$printer->{input_fh} = $fh;
-		}
-		else{
-			open my $fh2, '<', $fh or die "Couldn't open $fh";
-			$printer->{input_fh} = $fh2;
-		}
-	}
-	$printer->{input_fh};
-}
-
-sub print_tree{
-	my ($printer, $tree) = @_;
+sub tree_to_text{
+	my ($tree) = @_;
 	
     #traverse tree and construct the Soar production text
     my $text = 'sp {';
@@ -182,8 +149,8 @@ sub _simpleTest {
 	my $test = shift;
 	return _disjunctionTest($test->{disjunctionTest})
 		if( exists $test->{disjunctionTest} );
-	return _relationalTest($test->{relationalTest} )
-		if( exists $test->{relationalTest} );
+	return _relationalTest($test->{relationTest} )
+		if( exists $test->{relationTest} );
 	return _singleTest($test);
 }
 
@@ -219,7 +186,6 @@ sub _singleTest {
 
 sub _attrValueTests {
 	my $attrValuetests = shift;
-	print 'hello';
 	my ($negative, $attrs, $values) = 
 		(
 			$attrValuetests->{negative},
@@ -233,7 +199,7 @@ sub _attrValueTests {
 	
 	if($#$values != -1){
 		$text .= ' ';
-		$text .= map { _valueTest($_) } @$values;
+		$text .= join ' ', map { _valueTest($_) } @$values;
 	}
 	return $text;
 }
@@ -242,7 +208,6 @@ sub _attTest {
 	my $attTest = shift;
 	my $text = '^';
 	$text .= join '.', map { _test($_) } @$attTest;
-	print $text;
 	return $text;
 }
 
@@ -300,15 +265,31 @@ sub _attrValueMake {
 	my $attrValueMake = shift;
 	my ($attr, $valueMake) = 
 		($attrValueMake->{attr}, $attrValueMake->{valueMake});
-	my $text = '';
-	if($#$attr != -1){
-		$text .= join '.', map {_attr($_)} @$attr;
+	
+	my $text = _attr($$attr[0]);
+	if($#$attr != 0){
+		$text .= '.';
+		$text .= join '.', 
+			map { _variableOrSymConstant($_) } @$attr[1..$#$attr];
 	}
 	
 	$text .= ' ';
 	$text .= join ' ', map{_valueMake($_)} @$valueMake;
 	
 	return $text;
+}
+
+sub _attr {
+	my $attr = shift;
+	return '^' . _variableOrSymConstant($attr);
+}
+
+sub _variableOrSymConstant {
+	my $vOs = shift;
+	return _variable($vOs->{variable})
+		if(exists $vOs->{variable});
+	return _symConstant($vOs);
+	
 }
 
 sub _valueMake {
@@ -374,13 +355,6 @@ sub _funcName {
 	return $funcName;
 }
 
-sub _attr {
-	my $attr = shift;
-	return '^' . _variable($attr->{variable})
-		if(exists $attr->{variable});
-	return '^' . _symConstant($attr);
-}
-
 sub _variable {
 	my $variable = shift;
 	return '<' . $variable . '>'
@@ -418,9 +392,51 @@ sub _string {
 }
 
 sub _quoted {
-	return '|' . shift . '|';
+	my $text = shift;
+	
+	#escape vertical bars
+	$text =~ s/\|/\\|/g;
+	return '|' . $text . '|';
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Soar::Production::pRINT - Perl extension for printing Soar productions
+
+=head1 SYNOPSIS
+
+  use Soar::Production::Parser;
+  use Soar::Production::Printer;
+  use Data::Dumper;
+  
+  #read in a series of productions from a file
+  my $parser = Soar::Production::Parser->new;
+  my @trees=$parser->parse_file("foo.soar");
+  
+  #print each of the productions to standard out
+  for my $prod(@trees){
+	print tree_to_text($prod);
+  }
+
+=head1 DESCRIPTION
+
+This module can be used to print production parse trees produced by Soar::Production::parser. Use the function C<tree_to_text> to accomplish this.
+
+Printing is accomplished by traversing the input structure exactly as it is specified by the grammar used by Soar::Production::Parser. 
+  
+=head1 METHODS
+
+=head2 C<tree_to_text>
+
+Argument: parse tree structured as those returned by Soar::Production::Parser.
+Returns a text representation of the production which can be sourced by Soar.
+	
+=head2 TODO
+
+Pretty printing is not yet possible, which is too bad because it means the output can be pretty disgusting looking.
 
 	
