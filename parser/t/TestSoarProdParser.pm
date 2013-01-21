@@ -1,0 +1,61 @@
+package t::TestSoarProdParser;
+use Test::Base -Base;
+use Soar::Production::Parser;
+
+package t::TestSoarProdParser::Filter;
+use Test::Base::Filter -base;
+use Soar::Production::Parser;
+use Data::Dumper;
+
+my $parser = Soar::Production::Parser->new();
+
+#return the parse of the text
+sub parse { 
+	# print "parse " . $_[0] . "\n"; 
+	$parser->parse_text($_[0]);
+}
+
+#return 0 if the parse was unsuccessful, 1 if it was.	
+sub parse_success {
+	return 1 if defined $parser->parse_text($_[0]);
+	return 0;
+}
+
+#an argument like LHS,stateImpCond,attrValueTests,0 will return
+# $root->{LHS}->{stateImpCond}->{attrValueTests}->[0]
+sub dive {
+	my ($root) = shift @_;
+	my @path = split ',', Test::Base::Filter::current_arguments();
+	use Data::Diver qw (Dive);
+	return Dive($root,@path);
+}
+
+#returns the number of productions found in a string
+sub split_prods {
+	my ($prods) = shift @_;
+	my $productions = $parser->productions(text => $prods, parse => 0);
+	# print $productions;
+	return scalar @$productions;
+}
+
+#returns productions found in a string
+sub get_prods {
+	my ($prods) = shift @_;
+	# print 'Getting prods from ' . $prods . "\n";
+	my $args = Test::Base::Filter::current_arguments();
+	my $productions = $parser->productions(text => $prods, parse => 0);
+	# print "found $#$productions productions\n";
+	return $productions
+		unless defined $args;
+		
+	return $$productions[$args];
+}
+
+sub no_comment {
+	my ($text) = @_;
+	$text = $parser->no_comment($text);
+	# print "returning: \n$text\n";
+	return $text;
+}
+
+1;
