@@ -2,11 +2,14 @@
 use strict;
 use warnings;
 use Test::More;
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 plan tests => 5 + 1*blocks;
 
 use Soar::Production::Parser;
 use FindBin qw($Bin);
+
+# use vars '@INC';
+# print join ',', @INC;
 
 # use File::Find;
 # use File::Find::Closures qw(:all);

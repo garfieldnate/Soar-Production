@@ -1,6 +1,6 @@
 #test correct numbers (intConstant and floatConstant)
 
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Test::More 0.88;
 use Data::Dumper;

@@ -1,8 +1,10 @@
-package t::TestSoarProdParser;
+package t::parser::TestSoarProdParser;
 use Test::Base -Base;
 use Soar::Production::Parser;
 
-package t::TestSoarProdParser::Filter;
+1;
+
+package t::parser::TestSoarProdParser::Filter;
 use Test::Base::Filter -base;
 use Soar::Production::Parser;
 use Data::Dumper;

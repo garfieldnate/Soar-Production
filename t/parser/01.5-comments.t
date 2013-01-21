@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use Test::More;
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 plan tests => 1*blocks;
 
 filters { 

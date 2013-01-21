@@ -1,6 +1,6 @@
 #test correct flag handling
 
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Test::More 0.88;
 

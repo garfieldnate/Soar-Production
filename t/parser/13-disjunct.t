@@ -1,6 +1,6 @@
 #test correct disjunct handling (<< foo bar >>)
 
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Test::More 0.88;
 use Data::Dumper;

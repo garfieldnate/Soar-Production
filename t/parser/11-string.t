@@ -1,7 +1,7 @@
 #test correct string handling
 
-use t::TestSoarProdParser;
-# use t::TestSoarProdParser::Filter;
+use t::parser::TestSoarProdParser;
+# use t::parser::TestSoarProdParser::Filter;
 use Test::More 0.88;
 use Test::Deep;
 use Data::Dumper;

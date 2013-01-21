@@ -1,6 +1,6 @@
 #test correct float handling
 
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Data::Dumper;
 use Test::More 0.88;

@@ -3,9 +3,8 @@
 use strict;
 use Test::More 0.88;
 plan tests => 1;
-my $package = 'Soar::Production::Parser';
 
-require $package;
-new_ok($package);
+require Soar::Production::Parser;
+new_ok('Soar::Production::Parser');
 
 __END__

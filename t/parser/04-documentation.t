@@ -1,6 +1,6 @@
 ﻿#test correct documentation string handling
 use utf8;
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Test::More 0.88;
 

@@ -1,7 +1,7 @@
 #test preferences (<, =, etc.)
 #manual page 58-9
 
-use t::TestSoarProdParser;
+use t::parser::TestSoarProdParser;
 use Test::Deep;
 use Test::More 0.88;
 use Data::Dumper;
