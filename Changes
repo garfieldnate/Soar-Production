@@ -1,0 +1,8 @@
+
+Revision history for Soar-Production
+ 
+{{$NEXT}}
+
+0.01
+	Released: 2013-01-21 05:48:37 UTC
+	Initial release; combined Soar::Production::Parser and Soar::Production::Printer.
