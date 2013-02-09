@@ -3,6 +3,10 @@ Revision history for Soar-Production
  
 {{$NEXT}}
 
+0.02
+	Released: 2013-02-09 08:27:16 UTC
+	Fixed POD formatting.
+
 0.01
 	Released: 2013-01-21 05:48:37 UTC
 	Initial release; combined Soar::Production::Parser and Soar::Production::Printer.

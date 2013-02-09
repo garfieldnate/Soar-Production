@@ -79,7 +79,7 @@ Soar::Production- REPRESENTS A SOAR PRODUCTION
 
 =head1 DESCRIPTION
 
-=head METHODS
+=head1 METHODS
 
 =head2 C<new>
 
@@ -115,19 +115,30 @@ Set/get name of matched state
 Set/get name of matched state's superstate
 
 =head2 C<type>
+
 Does this production match a state or an impasse?
 
 =head2 C<validate>
+
 Check this production against a datamap.
 
 =head2 check semantic correctness
+
 Soar::Production::Parser does not check semantic correctness. The following are good things to check:
+
 =over3
+
 =item everything matched in RHS must be in LHS
+
 =item no empty RHS
+
 =item Only allowable non-operator preference is REJECT
+
 =item Check for existence of RHS function
+
 =item <s> not connected
+
 =item disconnect from goal or impasses (no 'state' or 'impasse' keyword)
+
 =back
 
