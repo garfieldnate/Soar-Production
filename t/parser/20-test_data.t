@@ -3,19 +3,14 @@ use strict;
 use warnings;
 use Test::More 0.88;
 use t::parser::TestSoarProdParser;
-# plan tests => 1*blocks;
 
 use Soar::Production::Parser;
 use FindBin qw($Bin);
-use File::Spec::Functions(qw(catdir catfile));
+use Path::Tiny;
 
-my $path = File::Spec->catdir( $Bin,'examples' );
-
-
-my $file = 'big';
+my $big_soar = path( $Bin,'examples', 'big.soar' );
 my $parser = Soar::Production::Parser->new();
-my $fullPath = File::Spec->catfile($path, $file . '.soar');
-my $productions = $parser->productions(file => $fullPath, parse => 0);
+my $productions = $parser->productions(file => $big_soar, parse => 0);
 plan tests => 1 + @$productions;
 
 note('Testing parser\'s ability to parse all productions in examples/big.soar');

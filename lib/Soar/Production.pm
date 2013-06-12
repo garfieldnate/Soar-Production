@@ -1,9 +1,8 @@
-#modified from "Effective Perl Programming" by Joseph N. Hall, et al.
+package Soar::Production;
+# ABSTRACT: REPRESENT SOAR PRODUCTIONS
 use strict;
 use warnings;
 
-# ABSTRACT: REPRESENT SOAR PRODUCTIONS
-package Soar::Production;
 use Carp;
 use Soar::Production::Parser;
 use Data::Dumper;
@@ -51,10 +50,6 @@ unless(caller){
 	}
 }
 
-sub _run {
-  my ($prod) = @_;
-}
-
 =head1 METHODS
 
 =head2 C<new>
@@ -72,7 +67,7 @@ sub new {
 
 # sub as_text {
 # 	my ($class) = @_;
-# 	# return $printer->tree_to_text($class)
+# 	# return tree_to_text($class)
 # }
 
 =head2 C<name>
@@ -102,7 +97,8 @@ A shortcut for C<prods_from(file => $arg)>.
 =cut
 
 sub prods_from_file{
-	return prods_from( file => shift() );
+	my ($file) = @_;
+	return prods_from( file => $file );
 }
 
 =head2 C<prods_from>
@@ -116,8 +112,8 @@ You must choose to export this function via the C<use> function:
 
 =cut
 
-sub prods_from {
-	my %args = @_;
+sub prods_from {## no critic (RequireArgUnpacking)
+	my (%args) = @_;
 	$args{text} or $args{file}
 		or croak 'Must specify parameter \'file\' or \'text\' to extract productions.';
 

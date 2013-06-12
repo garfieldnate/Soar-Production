@@ -1,18 +1,15 @@
+package Soar::Production::Printer;
+# ABSTRACT: Print Soar productions
 use strict;
 use warnings;
 
-# ABSTRACT: Print Soar productions
-package Soar::Production::Printer;
-
-use parent 'Exporter';
-our @EXPORT = qw(tree_to_text);
+# VERSION
 
 use Soar::Production::Parser;
-use Data::Dumper;
 use Carp;
-# use Test::More tests => 1;
-
-# VERSION
+use Exporter::Easy (
+	OK => [qw(tree_to_text)]
+);
 
 #default behavior is to read the input Soar file and output another one; worthless except for testing
 _run(shift) unless caller;
@@ -142,6 +139,7 @@ sub _conjunctiveTest {
 	$text .= join ' ',
 		map { _simpleTest($_) } @$conjTest;
 	$text .= '}';
+	return $text;
 }
 
 sub _simpleTest {
@@ -409,8 +407,7 @@ Soar::Production::pRINT - Perl extension for printing Soar productions
 =head1 SYNOPSIS
 
   use Soar::Production::Parser;
-  use Soar::Production::Printer;
-  use Data::Dumper;
+  use Soar::Production::Printer qw(tree_to_text);
 
   #read in a series of productions from a file
   my $parser = Soar::Production::Parser->new;
@@ -427,7 +424,9 @@ This module can be used to print production parse trees produced by Soar::Produc
 
 Printing is accomplished by traversing the input structure exactly as it is specified by the grammar used by Soar::Production::Parser.
 
-=head1 METHODS
+=head1 EXPORTED FUNCTIONS
+
+The following may be exported to the caller's namespace.
 
 =head2 C<tree_to_text>
 
