@@ -6,18 +6,18 @@ use Soar::Production::Parser;
 
 package t::parser::TestSoarProdParser::Filter;
 use Test::Base::Filter -base;
-use Soar::Production::Parser;
+use Soar::Production::Parser qw(no_comment);
 use Data::Dumper;
 
 my $parser = Soar::Production::Parser->new();
 
 #return the parse of the text
-sub parse { 
-	# print "parse " . $_[0] . "\n"; 
+sub parse {
+	# print "parse " . $_[0] . "\n";
 	$parser->parse_text($_[0]);
 }
 
-#return 0 if the parse was unsuccessful, 1 if it was.	
+#return 0 if the parse was unsuccessful, 1 if it was.
 sub parse_success {
 	return 1 if defined $parser->parse_text($_[0]);
 	return 0;
@@ -49,14 +49,13 @@ sub get_prods {
 	# print "found $#$productions productions\n";
 	return $productions
 		unless defined $args;
-		
+
 	return $$productions[$args];
 }
 
-sub no_comment {
+sub remove_comments {
 	my ($text) = @_;
-	$text = $parser->no_comment($text);
-	# print "returning: \n$text\n";
+	$text = no_comment($text);
 	return $text;
 }
 

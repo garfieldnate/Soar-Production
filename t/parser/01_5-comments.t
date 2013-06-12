@@ -2,21 +2,22 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::LongString;
 use t::parser::TestSoarProdParser;
 plan tests => 1*blocks;
 
-filters { 
-	no_comment 		=> 'no_comment',
+filters {
+	no_comment 		=> 'remove_comments',
 	parse_success 	=> 'parse_success',
 	# expected		=> 'chomp',
 };
 
 for my $block ( blocks('no_comment')){
-	is($block->no_comment, $block->expected, $block->name)
+	is_string_nows($block->no_comment, $block->expected, $block->name)
 }
 
 for my $block ( blocks('parse_success')){
-	is($block->parse_success, $block->expected, $block->name)
+	is_string_nows($block->parse_success, $block->expected, $block->name)
 }
 
 __END__
@@ -30,13 +31,13 @@ sp {one
 	#}
 -->
 }
---- expected 
+--- expected
 sp {one
 
-	-{(state <s> ^foo 1) 
+	-{(state <s> ^foo 1)
 		(<s> ^nested baz)
 	}
-	
+
 -->
 }
 === remove ;# comments
@@ -49,10 +50,10 @@ sp {one
 	}
 -->
 }
---- expected 
+--- expected
 sp {one
 
-	-{(state <s> ^foo 1) 
+	-{(state <s> ^foo 1)
 		(<s> ^nested baz)
 	}
 	}
@@ -86,7 +87,7 @@ sp {literals_test
 -->
    (<s> ^literal |\|#|)
 }
-=== remove normal comments
+=== remove commented ending bracket
 --- no_comment
 sp {one
 # sp {two
@@ -96,13 +97,13 @@ sp {one
 	#}
 -->
 }
---- expected 
+--- expected
 sp {one
 
-	-{(state <s> ^foo 1) 
+	-{(state <s> ^foo 1)
 		(<s> ^nested baz)
 	}
-	
+
 -->
 }
 === remove ;# comments
@@ -115,10 +116,10 @@ sp {one
 	}
 -->
 }
---- expected 
+--- expected
 sp {one
 
-	-{(state <s> ^foo 1) 
+	-{(state <s> ^foo 1)
 		(<s> ^nested baz)
 	}
 	}

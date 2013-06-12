@@ -28,26 +28,26 @@ sub _run {
     my $text = tree_to_text($$trees[0]);
 	my $tree = $parser->parse_text($text)
 		or croak 'illegal production printed';
-		
+
 	print $text;
 	return;
 }
 
 sub tree_to_text{
 	my ($tree) = @_;
-	
+
     #traverse tree and construct the Soar production text
     my $text = 'sp {';
 
     $text .= _name( $tree->{name} );
     $text .= _doc( $tree->{doc} );
     $text .= _flags( $tree->{flags} );
-	
+
     $text .= _LHS( $tree->{LHS} );
 	$text .= "\n-->\n\t";
     $text .= _RHS( $tree->{RHS} );
 	$text .= "\n}";
-	
+
 	return $text;
 }
 
@@ -75,65 +75,64 @@ sub _flags {
 
 sub _LHS {
 	my $LHS = shift;
-	return join "\n\t", 
+	return join "\n\t",
 		map { _condition($_) } @{ $LHS->{conditions} };
 }
 
 sub _condition {
 	my $condition = shift;
 	my $text = '';
-	
+
 	$text .= '-'
 		if($condition->{negative} eq 'yes');
-		
+
 	$text .= _positive_condition( $condition->{condition} );
-	
+
 	return $text;
 }
 
 sub _positive_condition {
 	my $condition = shift;
-	my $text = '';
-	
+
 	return _conjunction( $condition->{conjunction} )
 		if($condition->{conjunction});
-		
+
 	return _condsForOneId($condition);
 }
 
 sub _condsForOneId {
 	my $condsForOneId = shift;
 	my $text = '(';
-	my ($type, $idTest, $attrValueTests) = 
+	my ($type, $idTest, $attrValueTests) =
 		(
-			$condsForOneId->{condType}, 
-			$condsForOneId->{idTest}, 
+			$condsForOneId->{condType},
+			$condsForOneId->{idTest},
 			$condsForOneId->{attrValueTests}
 		);
-		
+
 	$text .= $type
 		if(defined $type);
-	
+
 	$text .= ' ' . _test($idTest)
 		if(defined $idTest);
-		
+
 	if($#$attrValueTests != -1){
 		$text .= ' ';
 		$text .= join ' ', map { _attrValueTests($_) } @$attrValueTests;
 	}
-	
+
 	$text .= ')';
 	return $text;
 }
 
 sub _test {
 	my $test = shift;
-	
+
 	if(exists $test->{conjunctiveTest}){
-		return _conjunctiveTest( 
+		return _conjunctiveTest(
 			$test->{conjunctiveTest} );
 	}
-	
+
 	return _simpleTest( $test->{simpleTest} );
 }
 
@@ -164,11 +163,11 @@ sub _disjunctionTest {
 
 sub _relationalTest {
 	my $test = shift;
-	
+
 	my $text = _relation( $test->{relation} );
 	$text .= ' ';
 	$text .= _singleTest( $test->{test} );
-	
+
 	return $text;
 }
 
@@ -186,7 +185,7 @@ sub _singleTest {
 
 sub _attrValueTests {
 	my $attrValuetests = shift;
-	my ($negative, $attrs, $values) = 
+	my ($negative, $attrs, $values) =
 		(
 			$attrValuetests->{negative},
 			$attrValuetests->{attrs},
@@ -196,7 +195,7 @@ sub _attrValueTests {
 	$text .= '-'
 		if($negative eq 'yes');
 	$text .= _attTest($attrs);
-	
+
 	if($#$values != -1){
 		$text .= ' ';
 		$text .= join ' ', map { _valueTest($_) } @$values;
@@ -214,17 +213,17 @@ sub _attTest {
 sub _valueTest {
 	my $valueTest = shift;
 	my $text = '';
-	
+
 	if(exists $valueTest->{test}){
 		$text = _test( $valueTest->{test} );
 	}else{
 		#condsForOneId
 		$text = _condsForOneId($valueTest->{conds});
 	}
-	
+
 	$text .= '+'
 		if($valueTest->{'+'} eq 'yes');
-	
+
 	return $text
 }
 
@@ -251,7 +250,7 @@ sub _action {
 	if(exists $action->{funcCall}){
 		return _funcCall($action->{funcCall});
 	}
-	
+
 	my $text = '(';
 	$text .= _variable($action->{variable});
 	$text .= ' ';
@@ -263,19 +262,19 @@ sub _action {
 
 sub _attrValueMake {
 	my $attrValueMake = shift;
-	my ($attr, $valueMake) = 
+	my ($attr, $valueMake) =
 		($attrValueMake->{attr}, $attrValueMake->{valueMake});
-	
+
 	my $text = _attr($$attr[0]);
 	if($#$attr != 0){
 		$text .= '.';
-		$text .= join '.', 
+		$text .= join '.',
 			map { _variableOrSymConstant($_) } @$attr[1..$#$attr];
 	}
-	
+
 	$text .= ' ';
 	$text .= join ' ', map{_valueMake($_)} @$valueMake;
-	
+
 	return $text;
 }
 
@@ -289,12 +288,12 @@ sub _variableOrSymConstant {
 	return _variable($vOs->{variable})
 		if(exists $vOs->{variable});
 	return _symConstant($vOs);
-	
+
 }
 
 sub _valueMake {
 	my $valueMake = shift;
-	my ($rhsValue, $preferences) = 
+	my ($rhsValue, $preferences) =
 		($valueMake->{rhsValue}, $valueMake->{preferences});
 	my $text = _rhsValue($rhsValue);
 	#there will always be at least one preference; '+' is default
@@ -315,10 +314,10 @@ sub _preference {
 #variable | constant | "(crlf)" | funcCall
 sub _rhsValue {
 	my $rhsValue = shift;
-	
+
 	return '(crlf)'
 		if($rhsValue eq '(crlf)');
-		
+
 	if(exists $rhsValue->{variable}){
 		return _variable($rhsValue->{variable});
 	}
@@ -334,8 +333,8 @@ sub _rhsValue {
 #(write |Hello World| |hello again|)
 sub _funcCall {
 	my $funcCall = shift;
-	
-	my ($name, $args) = 
+
+	my ($name, $args) =
 		(_funcName($funcCall->{function}), $funcCall->{args});
 	my $text = '(' . $name;
 	if($#$args != -1){
@@ -348,7 +347,7 @@ sub _funcCall {
 # arithmetic operator (+ - * /) or a symConstant, being the name of some function
 sub _funcName {
 	my $funcName = shift;
-	
+
 	if(ref $funcName eq 'HASH'){
 		return _symConstant($funcName);
 	}
@@ -363,7 +362,7 @@ sub _variable {
 sub _constant {
 	my $constant = shift;
 	my ($type, $value) = ($constant->{type}, $constant->{constant});
-	
+
 	return _symConstant($value) if($type eq 'sym');
 	return _int($value) if($type eq 'int');
 	return _float($value);#only other type is 'float'
@@ -393,7 +392,7 @@ sub _string {
 
 sub _quoted {
 	my $text = shift;
-	
+
 	#escape vertical bars
 	$text =~ s/\|/\\|/g;
 	return '|' . $text . '|';
@@ -412,11 +411,11 @@ Soar::Production::pRINT - Perl extension for printing Soar productions
   use Soar::Production::Parser;
   use Soar::Production::Printer;
   use Data::Dumper;
-  
+
   #read in a series of productions from a file
   my $parser = Soar::Production::Parser->new;
   my @trees=$parser->parse_file("foo.soar");
-  
+
   #print each of the productions to standard out
   for my $prod(@trees){
 	print tree_to_text($prod);
@@ -426,17 +425,16 @@ Soar::Production::pRINT - Perl extension for printing Soar productions
 
 This module can be used to print production parse trees produced by Soar::Production::parser. Use the function C<tree_to_text> to accomplish this.
 
-Printing is accomplished by traversing the input structure exactly as it is specified by the grammar used by Soar::Production::Parser. 
-  
+Printing is accomplished by traversing the input structure exactly as it is specified by the grammar used by Soar::Production::Parser.
+
 =head1 METHODS
 
 =head2 C<tree_to_text>
 
 Argument: parse tree structured as those returned by Soar::Production::Parser.
 Returns a text representation of the production which can be sourced by Soar.
-	
+
 =head2 TODO
 
 Pretty printing is not yet possible, which is too bad because it means the output can be pretty disgusting looking.
 
-	

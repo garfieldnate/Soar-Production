@@ -7,183 +7,14 @@ use warnings;
 use 5.010;
 
 # VERSION
-
+use Exporter::Easy (
+	OK => [qw(no_comment)]
+);
 use Soar::Production::Parser::PRDGrammar;
 use Parse::RecDescent;
 use Carp;
 use Data::Dumper;
 
-#a regular expression to split text into productions
-my $splitter = qr/
-	(sp\s+				#start with 'sp'	
-	\{					#opening brace
-	  (					#save to $2
-		 (?: 			#either
-			\{ (?-1) \}	#more braces and recurse
-			|			#or
-			(?:			#group
-				[^|{}]++	#not bar or braces
-				|   		#or
-				\| 			#a bar
-				(?:			#group
-					[^\\|]++	#no slashes or bars, no backtracking
-					|			#or
-					\\.			#slash anything
-				)*+ 
-				\|
-			)++				#one or more, no backtracking
-		 )*				#0 or more times
-	  )					#end $2
-	\}					#ending brace
-	)					#end $1
-/x;
-
-__PACKAGE__->new->_run(shift) unless caller;
-
-sub _run {
-  my ($soarParser, $filePath) = @_;
-  print Dumper($soarParser->productions(file => $filePath, parse => 1) );
-  return;
-}
-
-sub new {
-  my ($class) = @_;
-  my $soarParser = bless {}, $class;
-  $soarParser->_init;
-  return $soarParser;
-}
-
-sub _init {
-  my ($soarParser) = @_;
-    $soarParser->{parser} = Parse::RecDescent->new($Soar::Production::Parser::PRDGrammar::GRAMMAR);
-	
-	#if you wish to debug the grammar, try turning on traces by uncommenting the following lines:
-	# $::RD_TRACE = 1;
-	# $::RD_HINT = 1;
-	return;
-}
-
-
-sub productions {## no critic RequireArgUnpacking
-    my ($soarParser) = shift;
-	my %args = (
-		parse	=> 0,
-		text	=> undef,
-		file	=> undef,
-		@_
-	);
-	defined $args{text} or defined $args{file}
-		or croak 'Must specify parameter \'file\' or \'text\' to extract productions.';
-	
-	if($args{text}){
-		return $soarParser->_productions_from_text($args{text}, $args{parse});
-	}
-	if($args{file}){
-		# print "$args{file}\n";
-		return $soarParser->_productions_from_file($args{file}, $args{parse});
-	}
-}
-
-sub _productions_from_text {
-    my ( $soarParser, $text, $parse) = @_;
-	
-	#remove comments
-	# print 'Getting prods from ' . $text . "\n";
-	$text = $soarParser->no_comment($text);
-	# print "no_comments = $text";
-	my $productions = _split_text(\$text);
-	return $productions
-		unless($parse);
-	
-	return $soarParser->get_parses($productions);
-}
-
-sub _productions_from_file {
-    my ( $soarParser, $file, $parse) = @_;
-    my $text = _readFile($file);
-	
-	my $productions = _split_text($text);
-	return $productions
-		unless($parse);
-	
-	return $soarParser->get_parses($productions);
-}
-
-#split text reference into production
-sub _split_text {
-	my ($text) = @_;
-	#split the text into productions by looking for 'sp { ... }'
-	my @productions;
-	while($$text =~ /$splitter/g){
-		# print "found production: $1";
-		push @productions, $1;
-	}
-	return \@productions;
-}
-
-sub parse_text {
-    my ( $soarParser, $text ) = @_;
-    croak 'no text to parse!'
-      unless defined $text;
-    # $soarParser->{input} = \$text;
-    return $soarParser->{parser}->parse($text);
-}
-
-#expects array reference holding production text
-sub get_parses {
-	my ($soarParser, $productions) = @_;
-	my @parses;
-	for(@$productions){
-		# print STDERR $_;
-		push @parses, $soarParser->{parser}->parse($_);
-	}
-	return \@parses;
-}
-
-#argument should be an opened file handle
-#returns string pointer to text
-sub _readFile {
-    my ($file) = @_;
-    open my $fh, '<', $file
-		or croak "Couldn't open $file";
-		
-    my $text = q();
-    $text .= $_ while (<$fh>);
-	
-	close $fh;
-	$text = no_comment(undef,$text);
-    return \$text;
-}
-
-#remove Soar comments from a line.
-sub no_comment {
-	#s/#(?=[^|]*$).*$//; #nope
-	#s/#.*//g; #nope
-	my ($parser, $text) = @_;
-	$text =~ s/
-			(			#save in $1
-				\|			#literal bar
-				(?:			#group
-					\\[|]		#or an escaped bar
-					|
-					[^|]		#not a literal bar
-				)*		#zero or more of previous group
-				\|			#literal bar
-			)			#end save
-			|			#or
-			(?:;\s*)?			# optional semicolon
-			\#			# pound character
-			.*			#followed by anything
-		/			#replace with
-			$1||''	# $1 or nothing (the quote if there was one; 
-					# no quote will simply remove matching comment)
-		/xeg;
-	# print "returning $text";
-	return $text;
-}
-1;
-
-__END__
 =head1 NAME
 
 Soar::Production::Parser - Perl extension for parsing angst grammar files
@@ -207,29 +38,69 @@ Soar is a cognitive modeling architecture for programming and experimenting with
 	}
 
 The preceding production matches any state and adds an element named "foo" with the value "bar" to it. Productions can get much more complicated than that.
-This module can be used to parse these productions. Underlyingly, a Parse::RecDescent grammar is used to convert a production into a parse tree. 
-There are also methods for extracting all of the productions from a file string, and to remove comments (not that I think you'll ever want to do that!). 
-  
+This module can be used to parse these productions. Underlyingly, a Parse::RecDescent grammar is used to convert a production into a parse tree.
+There are also methods for extracting all of the productions from a file string, and to remove comments (not that I think you'll ever want to do that!).
+
+=cut
+
+
+#a regular expression to split text into productions
+my $splitter = qr/
+	(sp\s+				#start with 'sp'
+	\{					#opening brace
+	  (					#save to $2
+		 (?: 			#either
+			\{ (?-1) \}	#more braces and recurse
+			|			#or
+			(?:			#group
+				[^|{}]++	#not bar or braces
+				|   		#or
+				\| 			#a bar
+				(?:			#group
+					[^\\|]++	#no slashes or bars, no backtracking
+					|			#or
+					\\.			#slash anything
+				)*+
+				\|
+			)++				#one or more, no backtracking
+		 )*				#0 or more times
+	  )					#end $2
+	\}					#ending brace
+	)					#end $1
+/x;
+
+__PACKAGE__->new->_run(shift) unless caller;
+
+sub _run {
+  my ($soarParser, $filePath) = @_;
+  print Dumper($soarParser->productions(file => $filePath, parse => 1) );
+  return;
+}
+
 =head1 METHODS
 
 =head2 C<new>
 
 Creates a new parser.
 
-=head2 C<parse_text>
+=cut
 
-Argument: the text of a single Soar production.
-Returns: a parse tree for the given production.
+sub new {
+  my ($class) = @_;
+  my $soarParser = bless {}, $class;
+  $soarParser->_init;
+  return $soarParser;
+}
 
-=head2 C<get_parses>
+sub _init {
+  my ($soarParser) = @_;
+    $soarParser->{parser} = Parse::RecDescent->new($Soar::Production::Parser::PRDGrammar::GRAMMAR);
 
-Argument: Reference to array containing text for individual productions.
-Return: Reference to an array containing parse trees for each of the productions in the input array reference.
-
-=head2 C<no_comment>
-
-Argument: Text which contains Soar productions or commands
-Return: Same text, but with all comments removed. Comments are indicated with a # (pound), optionally preceded by a ; (semicolon) and whitespace.
+	#if you wish to debug the grammar, try turning on traces by uncommenting the following lines:
+	# $::RD_TRACE = 1;
+	# $::RD_HINT = 1;
+	return;
+}
 
 =head2 C<productions>
 
@@ -241,17 +112,159 @@ For example, if you would like to extract all of the productions from a file and
 
     use Soar::Production::Parser;
 	use Data::Dumper;
-	
+
 	my $file = shift;
 	my $parser = Soar::Production::Parser->new();
 	my $parses = $parser->productions(
 		file => $file,
 		parse => 1
 	);
-	
+
 	for my $prod(@$productions){
 		print Dumper($prod);
 	}
+
+=cut
+
+sub productions {## no critic RequireArgUnpacking
+    my ($soarParser) = shift;
+	my %args = (
+		parse	=> 0,
+		text	=> undef,
+		file	=> undef,
+		@_
+	);
+	defined $args{text} or defined $args{file}
+		or croak 'Must specify parameter \'file\' or \'text\' to extract productions.';
+
+	if($args{text}){
+		return $soarParser->_productions_from_text($args{text}, $args{parse});
+	}
+	if($args{file}){
+		# print "$args{file}\n";
+		return $soarParser->_productions_from_file($args{file}, $args{parse});
+	}
+}
+
+sub _productions_from_text {
+    my ( $soarParser, $text, $parse) = @_;
+
+	#remove comments
+	$text = no_comment($text);
+	my $productions = _split_text(\$text);
+	return $productions
+		unless($parse);
+
+	return $soarParser->get_parses($productions);
+}
+
+sub _productions_from_file {
+    my ( $soarParser, $file, $parse) = @_;
+    my $text = _readFile($file);
+
+	my $productions = _split_text($text);
+	return $productions
+		unless($parse);
+
+	return $soarParser->get_parses($productions);
+}
+
+#split text reference into production
+sub _split_text {
+	my ($text) = @_;
+	#split the text into productions by looking for 'sp { ... }'
+	my @productions;
+	while($$text =~ /$splitter/g){
+		# print "found production: $1";
+		push @productions, $1;
+	}
+	return \@productions;
+}
+
+=head2 C<parse_text>
+
+Argument: the text of a single Soar production.
+Returns: a parse tree for the given production.
+
+=cut
+
+sub parse_text {
+    my ( $soarParser, $text ) = @_;
+    croak 'no text to parse!'
+      unless defined $text;
+    # $soarParser->{input} = \$text;
+    return $soarParser->{parser}->parse($text);
+}
+
+
+=head2 C<get_parses>
+
+Argument: Reference to array containing text for individual productions.
+Return: Reference to an array containing parse trees for each of the productions in the input array reference.
+
+=cut
+
+sub get_parses {
+	my ($soarParser, $productions) = @_;
+	my @parses;
+	for(@$productions){
+		# print STDERR $_;
+		push @parses, $soarParser->{parser}->parse($_);
+	}
+	return \@parses;
+}
+
+#argument should be an opened file handle
+#returns string pointer to text
+sub _readFile {
+    my ($file) = @_;
+    open my $fh, '<', $file
+		or croak "Couldn't open $file";
+
+    my $text = q();
+    $text .= $_ while (<$fh>);
+
+	close $fh;
+	$text = no_comment($text);
+    return \$text;
+}
+
+=head1 EXPORTED FUNCTIONS
+
+The following functions are available for export:
+
+=head2 C<no_comment>
+
+Argument: Text which contains Soar productions or commands
+Return: Same text, but with all comments removed. Comments are indicated with a # (pound), optionally preceded by a ; (semicolon) and whitespace.
+
+=cut
+
+sub no_comment {
+	my ($text) = @_;
+	$text =~ s/
+			(			#save in $1
+				\|			#literal bar
+				(?:			#group
+					\\[|]		#an escaped bar
+					|
+					[^|]		#or anything but a literal bar
+				)*		#zero or more of previous group
+				\|			#literal bar
+			)			#end $1
+			|			#or
+			(?:;\s*)?			# optional semicolon
+			\#			# pound character
+			.*			#followed by anything
+		/			#replace with
+			$1||''	# $1 or nothing (the quote if there was one;
+					# no quote will simply remove matching comment)
+		/xeg;
+	return $text;
+}
+1;
+
+__END__
 
 =head1 SEE ALSO
 

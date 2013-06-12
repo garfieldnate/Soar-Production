@@ -282,12 +282,16 @@ Soar::Production::Parser::PRDGrammar - C<Parse::RecDescent> grammar for parsing 
 
 =head1 DESCRIPTION
 
-This module holds one string: a C<Parse::RecDescent> grammar for parsing Soar productions.
+This module holds one global string: a C<Parse::RecDescent>
+grammar for parsing Soar productions. It is not really intended for public consumption,
+but for use by modules L<Soar::Production> distribution.
 
 =head1 SYNOPSIS
 
   use Soar::Production::Parser::PRDGrammar;
   use Parse::RecDescent;
+
+  my $some_text = 'Soar productions here';
 
   my $parser = Parse::RecDescent->new($Soar::Production::Parser::PRDGrammar::GRAMMAR);
   $parser->parse($some_text);
