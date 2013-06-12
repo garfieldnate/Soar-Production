@@ -18,7 +18,7 @@ use File::Spec::Functions(qw(catdir catfile));
 my $path = File::Spec->catdir( $Bin,'examples' );
 
 my $fileNumbers = {
-	'_readme'			=>	0,
+	'readme'			=>	0,
 	'b'					=>	2,
 	'testmulti'			=>	3,
 	'generate-facts'	=>	5,
