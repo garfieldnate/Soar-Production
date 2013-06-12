@@ -1,5 +1,5 @@
 package Soar::Production::Parser::PRDGrammar;
-# ABSTRACT: P::RD grammar for Soar productions
+# ABSTRACT: Parse::RecDescent grammar for Soar productions
 
 use strict;
 use warnings;
@@ -366,7 +366,12 @@ Whereas the real Soar parser gives us an error, saying that <lt>s<gt> is not con
 
 =head1 BUGS
 
-This may belong in the realm of semantic verification, but for now it is considered a known bug. In Soar, numbers cannot be used to name a working memory element unless they are quoted. This is not yet implemented in this grammar, and thus the following is accepted, even though Soar would reject it:
+In Soar, numbers cannot be used to name
+a working memory element unless they are quoted; this is a
+L<known bug|https://code.google.com/p/soar/issues/detail?id=135>.
+This grammar does not implement that specific bug/feature,
+and thus the following is accepted, even though Soar would
+reject it:
 
 	sp {bad-numbers
 		(state <s> ^string.2.string)
