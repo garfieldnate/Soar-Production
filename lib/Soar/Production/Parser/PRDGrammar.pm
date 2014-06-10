@@ -229,8 +229,10 @@ our $GRAMMAR = <<'EOGRAMMAR';
 			{ constant => $item{symConstant}, type => 'sym' }
 		}
 	symConstant: string { $item{string} } | quoted { $item{quoted} }
+	#TODO: is colon allowed to start? look at jj file
 	string: /[A-Za-z0-9\$%&*+\/:=?_><-]+/
 		<reject: do{ $item[1] =~ /^<.*>$/} > #reject if we've actually found a variable
+		#TODO: explain this rejection
 		<reject: do{
 			$item[1] =~ /^ [+!~><=-]+ $/x and
 			$item[1] !~ /^ (?: >< | [<>]{3,}) $/x
@@ -381,6 +383,32 @@ reject it:
 		(state <s> ^string.2.string)
 	-->
 	}
+
+=head1 TODO
+
+=over
+
+=item *
+
+Add :monitor to production types
+
+=item *
+
+Support gp productions
+
+=item *
+
+Allow productions to be surrounded by either quotes or curly braces
+
+=item *
+
+Match Soar CLI commands
+
+=item *
+
+Check if integers can have a leading "+"
+
+
 
 =head1 SEE ALSO
 
