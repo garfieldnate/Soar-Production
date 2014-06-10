@@ -7,7 +7,7 @@ use Test::More 0.88;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	parse_success 		=> [qw(parse_success)],
 	parse_struct		=> 'parse',
 	expected_structure	=> 'eval'
@@ -38,10 +38,18 @@ sp {impasse
 }
 --- expected: 1
 
-=== no <s>
+=== no variable
 --- parse_success
 sp {no-variable
 	(state ^foo <bar>)
+-->	(<bar> ^foo <bar>)
+}
+--- expected: 1
+
+=== no variable or attribute
+--- parse_success
+sp {no-variable
+	(state)
 -->	(<bar> ^foo <bar>)
 }
 --- expected: 1
