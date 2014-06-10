@@ -1,4 +1,4 @@
-#test correct state handling
+#test correct handling of state/impasse/nothing in a condition
 
 use t::parser::TestSoarProdParser;
 use Test::Deep;
@@ -22,35 +22,43 @@ for my $block ( blocks('parse_struct')){
 }
 
 __END__
-=== state
+=== empty condition
 --- parse_success
-sp {state
+sp {empty-condition
+	()
+-->	(<bar> ^foo <bar>)
+}
+--- expected: 1
+
+=== state only
+--- parse_success
+sp {state-only
+	(state)
+-->	(<bar> ^foo <bar>)
+}
+--- expected: 1
+
+=== state with variable
+--- parse_success
+sp {state-var
 	(state <s>)
--->	(<s> ^foo <bar>)
+-->
 }
 --- expected: 1
 
-=== impasse
+=== state without variable, with assignment
 --- parse_success
-sp {impasse
-	(impasse <i>)
--->	(<i> ^foo <bar>)
-}
---- expected: 1
-
-=== no variable
---- parse_success
-sp {no-variable
+sp {state-no-variable
 	(state ^foo <bar>)
 -->	(<bar> ^foo <bar>)
 }
 --- expected: 1
 
-=== no variable or attribute
+=== impasse only
 --- parse_success
-sp {no-variable
-	(state)
--->	(<bar> ^foo <bar>)
+sp {impasse
+	(impasse)
+-->	(<i> ^foo <bar>)
 }
 --- expected: 1
 
