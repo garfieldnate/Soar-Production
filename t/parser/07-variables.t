@@ -1,4 +1,4 @@
-#test correct variable (symConstant) handling
+#test correct variable (symConstant) matching/handling
 
 use t::parser::TestSoarProdParser;
 use Test::Deep;
@@ -7,7 +7,7 @@ use Test::More 0.88;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	parse_success 		=> [qw(parse_success)],
 	parse_struct		=> 'parse',
 	expected_structure	=> 'eval'

@@ -31,7 +31,7 @@ Currently this actually crashes Soar
 --- parse_success
 sp {empty-condition
 	()
--->	(<bar> ^foo <bar>)
+-->
 }
 --- expected: 1
 
@@ -39,33 +39,41 @@ sp {empty-condition
 --- parse_success
 sp {state-only
 	(state)
--->	(<bar> ^foo <bar>)
-}
---- expected: 1
-
-=== missing variable from non-state condition
-Prints a warning in Soar
---- parse_success
-sp {no-state-no-variable
-    (^foo <baz>)
 -->
 }
 --- expected: 1
 
 === state with variable
 --- parse_success
-sp {state-var
+sp {state-variable
 	(state <s>)
 -->
 }
 --- expected: 1
 
-=== state without variable, with assignment
+=== state with assignment
 Prints a warning in Soar
 --- parse_success
-sp {state-no-variable
+sp {state-assignment
 	(state ^foo <bar>)
--->	(<bar> ^foo <bar>)
+-->
+}
+--- expected: 1
+
+=== state with variable and assignment
+--- parse_success
+sp {state-var-assignment
+	(state <s> ^foo <bar>)
+-->
+}
+--- expected: 1
+
+=== assignment without state or variable
+Prints a warning in Soar
+--- parse_success
+sp {unbound-assignment
+    (^foo <baz>)
+-->
 }
 --- expected: 1
 
@@ -73,6 +81,14 @@ sp {state-no-variable
 --- parse_success
 sp {impasse
 	(impasse)
+-->
+}
+--- expected: 1
+
+=== impasse with variable and assignment
+--- parse_success
+sp {impasse
+	(impasse <i> ^foo <bar>)
 -->	(<i> ^foo <bar>)
 }
 --- expected: 1

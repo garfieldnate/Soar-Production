@@ -7,7 +7,7 @@ use Test::More 0.88;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	parse_success 		=> [qw(parse_success)],
 	parse_struct		=> 'parse',
 	expected_structure	=> 'eval'
@@ -174,7 +174,9 @@ sp {cat
 --- expected: 1
 
 === concatenated make with bad parent
-only string/quoted/variable can have a child
+https://code.google.com/p/soar/issues/detail?id=135
+Only string/quoted/variable can have a child;
+currently failing to match the behavior caused by that bug.
 --- SKIP
 --- parse_success
 sp {cat
