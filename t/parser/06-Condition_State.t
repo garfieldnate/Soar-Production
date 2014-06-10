@@ -22,7 +22,12 @@ for my $block ( blocks('parse_struct')){
 }
 
 __END__
+Conditions which have attribute/value matches but no bound variable parse,
+but Soar prints a warning:
+ Warning: On the LHS of production xyz, identifier <s*1>
+ is not connected to any goal or impasse.
 === empty condition
+Currently this actually crashes Soar
 --- parse_success
 sp {empty-condition
 	()
@@ -38,6 +43,15 @@ sp {state-only
 }
 --- expected: 1
 
+=== missing variable from non-state condition
+Prints a warning in Soar
+--- parse_success
+sp {no-state-no-variable
+    (^foo <baz>)
+-->
+}
+--- expected: 1
+
 === state with variable
 --- parse_success
 sp {state-var
@@ -47,6 +61,7 @@ sp {state-var
 --- expected: 1
 
 === state without variable, with assignment
+Prints a warning in Soar
 --- parse_success
 sp {state-no-variable
 	(state ^foo <bar>)
@@ -62,7 +77,7 @@ sp {impasse
 }
 --- expected: 1
 
-=== structure of state
+=== structure of condition with state
 --- parse_struct dive=LHS,conditions,0,condition
 sp {foo
 	(state)
