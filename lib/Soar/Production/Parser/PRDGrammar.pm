@@ -64,12 +64,10 @@ our $GRAMMAR = <<'EOGRAMMAR';
 		}
 	condsForOneId: "(" <commit> condType(?) idTest(?) attrValueTests(s?) ")"
 		#only a state_imp_cond can be missing an idTest or attrValueTests
-		<reject: do {
-			not defined $item[3] and (
-				not defined $item[4] or $#{$item[5]} == -1
-			)
-		} >
 		{
+			# if(@{$item[3]} == 0 and (@{$item[4]} == 0 or @{$item[5]} == 0) ){
+			# 	print STDERR "unbound variable is likely to cause Soar to crash or warn";
+			# }
 			{
 				condType 	=> ($#{$item[3]} != -1 ? $item[3][0] : undef),
 				idTest 		=> ($#{$item[4]} != -1 ? $item[4][0]->{test} : undef),

@@ -26,8 +26,10 @@ Conditions which have attribute/value matches but no bound variable parse,
 but Soar prints a warning:
  Warning: On the LHS of production xyz, identifier <s*1>
  is not connected to any goal or impasse.
+The two that say "Crashes Soar" are related to this bug:
+https://code.google.com/p/soar/issues/detail?id=161
 === empty condition
-Currently this actually crashes Soar
+Crashes Soar
 --- parse_success
 sp {empty-condition
 	()
@@ -73,6 +75,15 @@ Prints a warning in Soar
 --- parse_success
 sp {unbound-assignment
     (^foo <baz>)
+-->
+}
+--- expected: 1
+
+=== variable with no state or assignment
+Crashes Soar
+--- parse_success
+sp {variable-alone
+    (<bar>)
 -->
 }
 --- expected: 1
