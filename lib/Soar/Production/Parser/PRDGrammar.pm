@@ -270,8 +270,8 @@ our $GRAMMAR = <<'EOGRAMMAR';
 		| normal { $item{normal} }
 
 	#strangely enough, the section after the period is optional; '1.' is legal.
-	normal: /^[-+]?[0-9]*\.[0-9]*/
-	scientific: /[+-]?[0-9]\.[0-9]+[eE][-+]?[0-9]+/
+	normal: /^[-+]?[0-9]*\.[0-9]*[dDfF]?/
+	scientific: /[+-]?[0-9]\.[0-9]+[eE][-+]?[0-9]+[dDfF]?/
 EOGRAMMAR
 
 1;

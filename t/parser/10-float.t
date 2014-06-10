@@ -7,7 +7,7 @@ use Test::More 0.88;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	# parse_success 		=> [qw(parse_success)],
 	parse_struct		=> ['parse', 'dive=LHS,conditions,0,condition,attrValueTests,0,values,0,test,simpleTest'],
 	expected_structure	=> 'eval'
@@ -25,7 +25,7 @@ __END__
 We just vary the value of foo
 
 === x.x
---- parse_struct 
+--- parse_struct
 sp {one
 	(state <s> ^foo 1.2)
 -->	(<s> ^foo foo)
@@ -34,7 +34,7 @@ sp {one
 { type=>'float', constant=>'1.2' }
 
 === -x.x
---- parse_struct 
+--- parse_struct
 sp {neg-x-x
 	(state <s> ^foo -1.3)
 -->	(<s> ^foo foo)
@@ -43,7 +43,7 @@ sp {neg-x-x
 { type=>'float', constant=>'-1.3' }
 
 === x.xex
---- parse_struct 
+--- parse_struct
 sp {x-xex
 	(state <s> ^foo 4.3e5)
 -->	(<s> ^foo foo)
@@ -52,7 +52,7 @@ sp {x-xex
 { type=>'float', constant=>'4.3e5' }
 
 === x.xE-x
---- parse_struct 
+--- parse_struct
 sp {neg-x-xE-x
 	(state <s> ^foo 4.3E-5)
 -->	(<s> ^foo foo)
@@ -61,10 +61,46 @@ sp {neg-x-xE-x
 { type=>'float', constant=>'4.3E-5' }
 
 === -x.xE-x
---- parse_struct 
+--- parse_struct
 sp {neg-x-xE-x
 	(state <s> ^foo -4.3E-5)
 -->	(<s> ^foo foo)
 }
 --- expected_structure
 { type=>'float', constant=>'-4.3E-5' }
+
+=== -x.xd
+--- parse_struct
+sp {neg-x-xd
+	(state <s> ^foo -4.3d)
+-->	(<s> ^foo foo)
+}
+--- expected_structure
+{ type=>'float', constant=>'-4.3d' }
+
+=== -x.xf
+--- parse_struct
+sp {neg-x-xf
+	(state <s> ^foo -4.3f)
+-->	(<s> ^foo foo)
+}
+--- expected_structure
+{ type=>'float', constant=>'-4.3f' }
+
+=== -x.xD
+--- parse_struct
+sp {neg-x-xD
+	(state <s> ^foo -4.3D)
+-->	(<s> ^foo foo)
+}
+--- expected_structure
+{ type=>'float', constant=>'-4.3D' }
+
+=== -x.xF
+--- parse_struct
+sp {neg-x-xF
+	(state <s> ^foo -4.3F)
+-->	(<s> ^foo foo)
+}
+--- expected_structure
+{ type=>'float', constant=>'-4.3F' }
