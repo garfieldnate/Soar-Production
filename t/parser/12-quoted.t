@@ -7,7 +7,7 @@ use Data::Dumper;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	parse_success 		=> [qw(parse_success)],
 	parse_struct		=> ['parse', 'dive=LHS,conditions,0,condition,attrValueTests,0,values,0,test,simpleTest'],
 	expected_structure	=> 'eval'
@@ -34,7 +34,7 @@ sp {blank
 { type => 'sym', constant => { type => 'quoted', value => '' } }
 
 === lots of garbage
---- parse_struct 
+--- parse_struct
 sp {garbage
 	(state <s> ^foo |foo bar	\"'!@#$%^&*}
 {()[]_+=-.,:;|)
@@ -45,13 +45,21 @@ sp {garbage
 {()[]_+=-.,:;'}  }
 
 === bar escaping
---- parse_struct 
+--- parse_struct
 sp {escaped
 	(state <s> ^foo |a bar (\|)|)
 -->	(<s> ^foo bar)
 }
 --- expected_structure
 { type => 'sym', constant => { type => 'quoted', value => 'a bar (|)' }  }
+
+=== slash not an escape
+--- parse_success
+sp {not-escaped
+    (state <s> ^foo |a slash \s was here|)
+--> (<s> ^foo bar)
+}
+--- expected: 1
 
 === no closing bar
 --- parse_success
