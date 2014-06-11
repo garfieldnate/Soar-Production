@@ -44,6 +44,14 @@ sp {garbage
 { type => 'sym', constant => { type => 'quoted', value => 'foo bar	\"\'!@#$%^&*}
 {()[]_+=-.,:;'}  }
 
+=== unicode
+--- parse_success
+sp {utf8
+	(state <s> ^foo |ぐ|)
+-->	(<s> ^foo bar)
+}
+--- expected: 1
+
 === bar escaping
 --- parse_struct
 sp {escaped
