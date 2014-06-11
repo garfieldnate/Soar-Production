@@ -1,4 +1,4 @@
-#test correct handling of state/impasse/nothing in a condition
+#test basic condition structure (including state and impasse)
 
 use t::parser::TestSoarProdParser;
 use Test::Deep;
@@ -17,7 +17,7 @@ run_is 'parse_success' => 'expected';
 
 for my $block ( blocks('parse_struct')){
 	# print STDERR Dumper($block->parse_struct);
-	cmp_deeply($block->expected_structure, subhashof($block->parse_struct), $block->name)
+	cmp_deeply($block->expected_structure, $block->parse_struct, $block->name)
 		or diag explain $block->parse_struct;
 }
 
@@ -116,3 +116,31 @@ sp {foo
 	idTest			=> undef,
 	attrValueTests 	=> [],
 }
+
+=== negative
+--- parse_success
+sp {negative
+	(state <s>)
+	-(<s> ^foo bar)
+-->
+}
+--- expected: 1
+
+=== negative structure
+--- parse_struct dive=LHS,conditions,0,negative
+sp {negative
+	-(<s> ^foo bar)
+-->
+}
+--- expected_structure
+'yes'
+
+=== positive structure
+--- parse_struct dive=LHS,conditions,0,negative
+sp {positive
+	(state <s>)
+	(<s> ^foo bar)
+-->
+}
+--- expected_structure
+'no'
