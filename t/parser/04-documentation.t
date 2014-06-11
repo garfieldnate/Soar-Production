@@ -6,7 +6,7 @@ use Test::More 0.88;
 
 plan tests => 1*blocks;
 
-filters { 
+filters {
 	parse_success 			=> [qw(parse_success)],
 	parse_struct			=> 'parse',
 	expected_structure		=> 'eval'
@@ -31,7 +31,7 @@ sp {one-line-quote
 === two line quote
 --- parse_success
 sp {two-line-quote
-	"stuff that I 
+	"stuff that I
 	think is cool"
 	(state <s>)
 -->	(<s> ^foo <bar>)
@@ -44,6 +44,15 @@ sp {utf8
 	"ぐ"
 	(state <s>)
 -->	(<s> ^foo <bar>)
+}
+--- expected: 1
+
+=== escaped quote
+--- parse_success
+sp {escaped
+	"stuff that I \"think is cool"
+	(state <s>)
+-->
 }
 --- expected: 1
 

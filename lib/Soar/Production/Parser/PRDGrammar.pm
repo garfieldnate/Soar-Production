@@ -34,7 +34,7 @@ our $GRAMMAR = <<'EOGRAMMAR';
 	prodname: /[\dA-Za-z][\dA-Za-z\$%&*=><?_\/\@:-]*/
 
 	#documentation can span many lines
-	documentation: '"' <commit> /[^"]*/ms '"'
+	documentation: '"' <commit> /(?:\\["]|[^"])*/ms '"'
 		{
 			$item[3]
 		}
