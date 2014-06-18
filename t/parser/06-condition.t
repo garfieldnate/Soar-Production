@@ -144,3 +144,31 @@ sp {positive
 }
 --- expected_structure
 'no'
+
+=== condition starts with test
+--- parse_success
+sp {state-conjunction
+	(state { <> stuff <s2> })
+	-->
+}
+--- expected: 1
+
+=== condition starts with test (two id's)
+Soar parses it but ignores the test.
+"ignoring test(s) whose referent is unbound: Symbol: <s1>  Test: <> <s2>"
+--- parse_success
+sp {state-conjunction-unbound
+	(state { <> <s2> <s1> })
+	-->
+}
+--- expected: 1
+
+=== condition starts with test (constant id field)
+Soar parses it but won't add it to the productions.
+"Constant stuff in id field test. This will never match."
+--- parse_success
+sp {state-conjunction-no-match
+	(state { <> <s2> stuff })
+	-->
+}
+--- expected: 1
